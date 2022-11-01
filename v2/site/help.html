@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<script>
+    function onClick() {
+        text=document.getElementById("info").value
+        url="/v2/site/index.html?"+window.encodeURIComponent(text)
+        window.location.href=url
+    }
+</script>
+</head>
+<body class='typora-export os-windows'><div class='typora-export-content'>
+<div id='write'  class=''><h2 id='如何获得一个绿色的校园通行码'><span>如何获得一个绿色的校园通行码</span></h2><h3 id='第一步'><span>第一步</span></h3><p><span>点击这个</span><a href='https://n.buaa.edu.cn/site/go-back-school/health-code?type=rxk'><span>链接</span></a><span>，把网站上的内容复制下来</span></p><h3 id='第二步'><span>第二步</span></h3><p><span>粘贴到下面的框里，然后点生成绿码</span></p><p>&nbsp;</p></div></div>
+<textarea cols="25" rows="5" id="info"></textarea>
+<button onclick="onClick()">生成绿码</button>
+</body>
+</html>
