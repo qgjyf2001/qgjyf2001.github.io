@@ -13207,8 +13207,13 @@
 
 					function m() {
 						if (h) {
+							var url=h.responseURL
+							var resText=h.responseText
+							if (url.indexOf("v2/static/json/health-code.json")!=-1) {
+								resText={"e":0,"m":"操作成功","d":{"number":"19373655","backgroup_color":"green","current_card_text":"暂未查询到申请记录","avatar":"https://imgai.buaa.edu.cn/image/1289/192bb7d786be5ab068622db8bedcf087.png","name":"姜一凡","sex":"男","mobile":"","type":0,"identity_name":"","depart_name":"网络空间安全学院","begin_time":"","end_time":"","msg":"","notice_text":"","sylb":"","r":"974f5edd-7726-34f6-ae95-25e5b5f8c2bc","e":"84cee190a4b0bdb85217f38db6018c68"}}
+							}
 							var n = "getAllResponseHeaders" in h ? s(h.getAllResponseHeaders()) : null,
-								i = d && "text" !== d && "json" !== d ? h.response : h.responseText,
+								i = d && "text" !== d && "json" !== d ? h.response : resText,
 								a = {
 									data: i,
 									status: h.status,
@@ -13222,7 +13227,6 @@
 					}
 					var url= a(b, t.params, t.paramsSerializer)
 					url=url.replace("site/go-back-school/health-code","v2/static/json/health-code.json")
-					console.log("url"+url)
 					if (h.open(t.method.toUpperCase(), url, !0), h.timeout = t.timeout, "onloadend" in h ? h.onloadend = m : h.onreadystatechange = function() {
 						h && 4 === h.readyState && (0 !== h.status || h.responseURL && 0 === h.responseURL.indexOf("file:")) && setTimeout(m)
 					}, h.onabort = function() {
