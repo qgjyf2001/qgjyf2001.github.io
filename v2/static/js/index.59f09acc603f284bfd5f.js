@@ -2114,7 +2114,7 @@
 								isMobile: !0
 							}
 						},
-						"m_through.html": {
+						"index.html": {
 							comLoad: function(e) {
 								c.e("chunk-051bede9").then(function() {
 									var a = [c("4b14")];
