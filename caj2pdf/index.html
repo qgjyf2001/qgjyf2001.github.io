@@ -1,0 +1,152 @@
+<!doctype html>
+<!--
+Copyright 2018 The Go Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Go wasm</title>
+</head>
+
+<body>
+	<!--
+	Add the following polyfill for Microsoft Edge 17/18 support:
+	<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+	(see https://caniuse.com/#feat=textencoder)
+	-->
+	<script src="wasm_exec.js"></script>
+	<script src="mutool.js"></script>
+	<script>
+		if (!WebAssembly.instantiateStreaming) { // polyfill
+			WebAssembly.instantiateStreaming = async (resp, importObject) => {
+				const source = await (await resp).arrayBuffer();
+				return await WebAssembly.instantiate(source, importObject);
+			};
+		}
+		const go = new Go();
+		let mod, inst;
+		WebAssembly.instantiateStreaming(fetch("caj2pdf.wasm"), go.importObject).then((result) => {
+			mod = result.module;
+			inst = result.instance;
+			document.getElementById("runButton").disabled = false;
+		}).catch((err) => {
+			console.error(err);
+		});
+		function download(filename, content) {
+			var blob = new Blob([content], {type: 'application/arraybuffer'});
+			var url = window.URL.createObjectURL(blob);
+			var a = document.createElement('a');
+
+			a.style = "display: none";
+			a.href = url;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+
+			setTimeout(function () {
+				document.body.removeChild(a);
+				window.URL.revokeObjectURL(url);
+			}, 5);
+		}
+
+		var Base64 = {
+
+			// private property
+			_keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+		
+			// public method for encoding
+			encode: function(input) {
+				var output = "";
+				var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+				var i = 0;
+		
+		
+				while (i < input.length) {
+		
+					chr1 = input.charCodeAt(i++);
+					chr2 = input.charCodeAt(i++);
+					chr3 = input.charCodeAt(i++);
+		
+					enc1 = chr1 >> 2;
+					enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+					enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+					enc4 = chr3 & 63;
+		
+					if (isNaN(chr2)) {
+						enc3 = enc4 = 64;
+					} else if (isNaN(chr3)) {
+						enc4 = 64;
+					}
+		
+					output = output + this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) + this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+		
+				}
+		
+				return output;
+			},
+		
+			// public method for decoding
+			decode: function(input) {
+				var output = "";
+				var chr1, chr2, chr3;
+				var enc1, enc2, enc3, enc4;
+				var i = 0;
+		
+				input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+		
+				while (i < input.length) {
+		
+					enc1 = this._keyStr.indexOf(input.charAt(i++));
+					enc2 = this._keyStr.indexOf(input.charAt(i++));
+					enc3 = this._keyStr.indexOf(input.charAt(i++));
+					enc4 = this._keyStr.indexOf(input.charAt(i++));
+		
+					chr1 = (enc1 << 2) | (enc2 >> 4);
+					chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+					chr3 = ((enc3 & 3) << 6) | enc4;
+		
+					output = output + String.fromCharCode(chr1);
+		
+					if (enc3 != 64) {
+						output = output + String.fromCharCode(chr2);
+					}
+					if (enc4 != 64) {
+						output = output + String.fromCharCode(chr3);
+					}
+		
+				}
+		
+				return new Uint8Array([...output].map(char => char.charCodeAt(0)));;
+		
+			},
+		}
+		function to_pdf() {
+			go.run(inst);
+			var reader = new FileReader();
+			reader.readAsBinaryString(document.getElementById("file").files[0]);    // 解析成base64格式
+			reader.onload = function () { 
+				var output=caj2pdf(Base64.encode(this.result))
+				output=Base64.decode(output)
+
+				const pdf_length = Module.ccall('mupdf_clean_length', 'number', ['array', 'number'], [output, output.length]);
+				const pdf_ptr = Module.ccall('mupdf_clean', 'number', ['array', 'number'], [output, output.length]);
+				const arr = [];
+				const memoryView = new Uint8Array(Module.asm.memory.buffer);
+				for (var i=0;i<pdf_length;i++) {
+					arr.push(memoryView[i+pdf_ptr]);
+				}
+				const ret = new Uint8Array(arr) 
+				download('1.pdf',ret)
+			}
+			inst = WebAssembly.instantiate(mod, go.importObject); // reset instance
+		}
+	</script>
+
+	<input type="file" id="file" name="myfile" />
+	<button onClick="to_pdf();" id="runButton" disabled>转换为pdf</button>
+</body>
+
+</html>
