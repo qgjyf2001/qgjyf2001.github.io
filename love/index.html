@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>恋爱纪念日</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <div class="right-container">
+    <p>开始时间:2024年2月13日</p>
+    <p id="love_time">我们在一起已经天</p>
+  </div>
+  <script>
+    function daysUntilDate(targetDate) {  
+      // 创建一个Date对象表示目标日期  
+      const target = new Date(targetDate);  
+      // 创建一个Date对象表示当前日期和时间  
+      const now = new Date();  
+        
+      // 计算两个日期之间的毫秒差  
+      const diff = now - target;  
+        
+      // 将毫秒差转换为天数  
+      // 注意：1天 = 1000毫秒 * 60秒 * 60分钟 * 24小时  
+      const daysDiff = Math.ceil(diff / (1000 * 60 * 60 * 24));  
+        
+      return daysDiff;  
+    }
+    const days = daysUntilDate("2024-02-13");
+    document.getElementById("love_time").innerText = `我们在一起已经${days}天`
+  </script>
+</body>
+
+</html>
